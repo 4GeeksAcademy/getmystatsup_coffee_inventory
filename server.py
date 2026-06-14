@@ -1,5 +1,6 @@
 import csv
 from pathlib import Path
+import shutil
 from threading import Lock
 from typing import List
 from uuid import uuid4
@@ -8,7 +9,8 @@ from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 
-DATA_FILE = Path("inventory.csv")
+DATA_FILE = Path("products.csv")
+LEGACY_DATA_FILE = Path("inventory.csv")
 CSV_HEADERS = ["id", "name", "stock", "min_stock", "unit"]
 
 
@@ -102,6 +104,10 @@ class InventoryStore:
 
 
 app = FastAPI(title="Coffee Inventory API", version="1.0.0")
+
+if not DATA_FILE.exists() and LEGACY_DATA_FILE.exists():
+    shutil.copy2(LEGACY_DATA_FILE, DATA_FILE)
+
 store = InventoryStore(DATA_FILE)
 
 
